@@ -1,7 +1,7 @@
 import { useState, forwardRef, useEffect, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { FaSearch } from 'react-icons/fa';
-import SafeVidSrcPlayer from './components/SafeVidSrcPlayer'; // <-- NEW import
+import SafeVidSrcPlayer from '../../components/SafeVidSrcPlayer'; // <-- NEW import
 
 const API_KEY = import.meta.env.VITE_TMDB_API;
 const BASE_URL = import.meta.env.VITE_BASE_URL;

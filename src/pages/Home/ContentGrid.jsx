@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ContentCard from './ContentCard';
 import { fetchContentByGenre } from './Fetcher';
 import { BiWifi } from 'react-icons/bi';
-import SafeVidSrcPlayer from './components/SafeVidSrcPlayer'; // <-- NEW
+import SafeVidSrcPlayer from '../../components/SafeVidSrcPlayer'; // <-- NEW
 
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const MAX_PAGES = 500;
