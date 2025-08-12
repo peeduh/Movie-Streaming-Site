@@ -6,6 +6,8 @@ import { BiWifi } from 'react-icons/bi';
 
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const MAX_PAGES = 500;
+const API_KEY = import.meta.env.VITE_TMDB_API;
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const ErrorWarning = () => (
   <div className="flex flex-col items-center justify-center space-y-2 p-4  max-w-xs mx-auto">
@@ -18,7 +20,7 @@ const ErrorWarning = () => (
   </div>
 );
 
-const ContentGrid = ({ genreId, type, onSelect }) => {
+const ContentGrid = ({ genreId, type }) => {
   const [state, setState] = useState({
     content: [],
     loading: false,
@@ -31,6 +33,26 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
   const loadingRef = useRef(false);
   const observerRef = useRef(null);
   const lastElementRef = useRef(null);
+
+  // Fetch and open in new tab
+  const openOnVidSrc = async (item) => {
+    try {
+      const kind = type === 'tv' || item.media_type === 'tv' ? 'tv' : 'movie';
+      const res = await fetch(
+        `${BASE_URL}/${kind}/${item.id}/external_ids?api_key=${API_KEY}`
+      );
+      const data = await res.json();
+      const imdbId = data?.imdb_id;
+      if (!imdbId) {
+        alert('No IMDb ID found for this title.');
+        return;
+      }
+      window.open(`https://vidsrc.net/embed/${imdbId}`, '_blank', 'noopener,noreferrer');
+    } catch (e) {
+      console.error(e);
+      alert('Could not open the video. Please try again.');
+    }
+  };
 
   const loadContent = useCallback(async () => {
     if (loadingRef.current || !state.hasMore) return;
@@ -145,7 +167,7 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
             title={item.title || item.name}
             poster={posterPath}
             rating={item.vote_average}
-            onClick={() => onSelect(item)}
+            onClick={() => openOnVidSrc(item)}
             releaseDate={item.release_date || item.first_air_date}
             aria-label={`Select ${item.title || item.name}`}
           />
@@ -191,8 +213,7 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
 
 ContentGrid.propTypes = {
   genreId: PropTypes.number.isRequired,
-  type: PropTypes.oneOf(['movie', 'tv']).isRequired,
-  onSelect: PropTypes.func.isRequired,
+  type: PropTypes.oneOf(['movie', 'tv']).isRequired
 };
 
 export default ContentGrid;
