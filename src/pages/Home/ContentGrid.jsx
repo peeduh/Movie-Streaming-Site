@@ -6,6 +6,8 @@ import { BiWifi } from 'react-icons/bi';
 
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const MAX_PAGES = 500;
+
+// NEW: we need these to fetch the IMDb ID for each item
 const API_KEY = import.meta.env.VITE_TMDB_API;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -20,7 +22,7 @@ const ErrorWarning = () => (
   </div>
 );
 
-const ContentGrid = ({ genreId, type }) => {
+const ContentGrid = ({ genreId, type, onSelect }) => {
   const [state, setState] = useState({
     content: [],
     loading: false,
@@ -33,26 +35,6 @@ const ContentGrid = ({ genreId, type }) => {
   const loadingRef = useRef(false);
   const observerRef = useRef(null);
   const lastElementRef = useRef(null);
-
-  // Fetch and open in new tab
-  const openOnVidSrc = async (item) => {
-    try {
-      const kind = type === 'tv' || item.media_type === 'tv' ? 'tv' : 'movie';
-      const res = await fetch(
-        `${BASE_URL}/${kind}/${item.id}/external_ids?api_key=${API_KEY}`
-      );
-      const data = await res.json();
-      const imdbId = data?.imdb_id;
-      if (!imdbId) {
-        alert('No IMDb ID found for this title.');
-        return;
-      }
-      window.open(`https://vidsrc.net/embed/${imdbId}`, '_blank', 'noopener,noreferrer');
-    } catch (e) {
-      console.error(e);
-      alert('Could not open the video. Please try again.');
-    }
-  };
 
   const loadContent = useCallback(async () => {
     if (loadingRef.current || !state.hasMore) return;
@@ -150,6 +132,29 @@ const ContentGrid = ({ genreId, type }) => {
     return 3;
   };
 
+  // NEW: open through your Netlify proxy route
+  const openViaProxy = async (item) => {
+    try {
+      const kind = type === 'tv' || item.media_type === 'tv' ? 'tv' : 'movie';
+      const res = await fetch(
+        `${BASE_URL}/${kind}/${item.id}/external_ids?api_key=${API_KEY}`
+      );
+      const data = await res.json();
+      const imdbId = data?.imdb_id;
+      if (!imdbId) {
+        alert('No IMDb ID found for this title.');
+        return;
+      }
+      // If your route is /p/:imdb instead, change to `/p/${imdbId}`
+      window.open(`/vidproxy/${imdbId}`, '_blank');
+      // If you still want to notify parent selection, you can call:
+      // onSelect?.(item);
+    } catch (e) {
+      console.error(e);
+      alert('Could not open the video. Please try again.');
+    }
+  };
+
   const renderContent = () => {
     const items = state.content.map((item, index) => {
       const isLastElement = index === state.content.length - 1;
@@ -167,7 +172,7 @@ const ContentGrid = ({ genreId, type }) => {
             title={item.title || item.name}
             poster={posterPath}
             rating={item.vote_average}
-            onClick={() => openOnVidSrc(item)}
+            onClick={() => openViaProxy(item)}  // <-- CHANGED
             releaseDate={item.release_date || item.first_air_date}
             aria-label={`Select ${item.title || item.name}`}
           />
@@ -213,7 +218,8 @@ const ContentGrid = ({ genreId, type }) => {
 
 ContentGrid.propTypes = {
   genreId: PropTypes.number.isRequired,
-  type: PropTypes.oneOf(['movie', 'tv']).isRequired
+  type: PropTypes.oneOf(['movie', 'tv']).isRequired,
+  onSelect: PropTypes.func.isRequired,
 };
 
 export default ContentGrid;
