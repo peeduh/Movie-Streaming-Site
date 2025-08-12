@@ -19,19 +19,19 @@ const ImageWithFallback = ({ src, alt, className }) => {
   };
 
   return (
-    <div className={relative ${className} bg-gray-900}>
+    <div className={`relative ${className} bg-gray-900`}>
       {isLoading && src && (
         <img
-          src={${BLUR_HASH_URL}${src}}
+          src={`${BLUR_HASH_URL}${src}`}
           alt="Loading..."
           className="absolute inset-0 w-full h-full object-cover filter blur-md"
         />
       )}
       {!error && src ? (
         <img
-          src={${IMAGE_BASE_URL}${src}}
+          src={`${IMAGE_BASE_URL}${src}`}
           alt={alt}
-          className={w-full h-full object-cover ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300}
+          className={`w-full h-full object-cover ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
           onLoad={handleLoad}
           onError={handleError}
           loading="lazy"
@@ -49,8 +49,8 @@ const SearchResults = ({ results, selectedIndex, onMouseEnter, onClick }) => {
   const renderResultItem = (item, index) => (
     <div
       key={item.id}
-      className={flex items-center p-2 border-b border-slate-950 cursor-pointer transition-colors duration-200
-        ${selectedIndex === index ? 'bg-gray-700' : 'hover:bg-gray-800'}}
+      className={`flex items-center p-2 border-b border-slate-950 cursor-pointer transition-colors duration-200
+        ${selectedIndex === index ? 'bg-gray-700' : 'hover:bg-gray-800'}`}
       onMouseEnter={() => onMouseEnter(index)}
       onClick={() => onClick(item)}
     >
@@ -117,11 +117,11 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
 
     try {
       const response = await fetch(
-        ${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(searchQuery)}&language=en-US&page=1&include_adult=false
+        `${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(searchQuery)}&language=en-US&page=1&include_adult=false`
       );
 
       if (!response.ok)
-        throw new Error(HTTP error! status: ${response.status});
+        throw new Error(`HTTP error! status: ${response.status}`);
 
       const data = await response.json();
       const filteredResults = data.results
@@ -138,13 +138,13 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
     }
   };
 
-  // NEW: open VidSrc in a new tab using IMDb ID
+  // Open VidSrc in a new tab using IMDb ID (unchanged from your original)
   const handleItemSelection = useCallback(
     async (item) => {
       try {
         const kind = item.media_type === 'tv' ? 'tv' : 'movie';
         const res = await fetch(
-          ${BASE_URL}/${kind}/${item.id}/external_ids?api_key=${API_KEY}
+          `${BASE_URL}/${kind}/${item.id}/external_ids?api_key=${API_KEY}`
         );
         const data = await res.json();
         const imdbId = data?.imdb_id;
@@ -155,7 +155,7 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
         }
 
         window.open(
-          https://vidsrc.net/embed/${imdbId},
+          `https://vidsrc.net/embed/${imdbId}`,
           '_blank',
           'noopener,noreferrer'
         );
@@ -214,11 +214,11 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
   }, [query, debouncedSearch]);
 
   const searchInputClasses = useMemo(
-    () => 
+    () => `
     w-full bg-gray-800 text-white px-6 py-1.5 rounded-full text-sm
     focus:outline-none focus:ring-2 focus:ring-red-600 transition-all duration-200
     ${isActive ? 'ring-2 ring-white' : ''}
-  ,
+  `,
     [isActive]
   );
 
@@ -242,10 +242,10 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
           <FaSearch className="absolute right-3 top-2 text-gray-400 text-sm" />
           {loading && (
             <div className="absolute right-12 top-2 flex items-center gap-2">
-              <div className="animate-spin h-4 w-6  rounded-full border-t-transparent"></div>
+              <div className="animate-spin h-4 w-6 rounded-full border-t-transparent"></div>
             </div>
           )}
-          {error && <p className=" text-xs mt-1">{error}</p>}
+          {error && <p className="text-xs mt-1">{error}</p>}
         </div>
 
         {results.length > 0 && (
@@ -259,7 +259,7 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
             <button
               onClick={clearSearch}
               className="mt-2 px-4 py-1.5 text-sm bg-red-600 text-white rounded-md 
-                focus:outline-none  transition-colors duration-200"
+                focus:outline-none transition-colors duration-200"
             >
               Clear Search
             </button>

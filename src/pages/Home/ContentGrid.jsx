@@ -8,7 +8,7 @@ const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const MAX_PAGES = 500;
 
 const ErrorWarning = () => (
-  <div className="flex flex-col items-center justify-center space-y-2 p-4  max-w-xs mx-auto">
+  <div className="flex flex-col items-center justify-center space-y-2 p-4 max-w-xs mx-auto">
     <div className="relative">
       <BiWifi className="text-red-400 w-6 h-10 absolute -top-1 mb-5 -right-1 animate-bounce" />
     </div>
@@ -132,10 +132,10 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
     const items = state.content.map((item, index) => {
       const isLastElement = index === state.content.length - 1;
       const posterPath = item.poster_path
-        ? ${POSTER_BASE_URL}${item.poster_path}
+        ? `${POSTER_BASE_URL}${item.poster_path}`
         : '/assets/placeholder.jpg';
 
-      return (
+    return (
         <div
           key={item.id}
           ref={isLastElement ? lastElementRef : null}
@@ -147,7 +147,7 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
             rating={item.vote_average}
             onClick={() => onSelect(item)}
             releaseDate={item.release_date || item.first_air_date}
-            aria-label={Select ${item.title || item.name}}
+            aria-label={`Select ${item.title || item.name}`}
           />
         </div>
       );
@@ -160,7 +160,7 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
       for (let i = 0; i < missingItems; i++) {
         items.push(
           <div
-            key={placeholder-${i}}
+            key={`placeholder-${i}`}
             className="aspect-[2/3] min-h-[200px] w-full mb-4"
           >
             {generatePlaceholder()}
@@ -173,7 +173,7 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
   };
 
   return (
-    <div className=" px-2 sm:px-4 py-6">
+    <div className="px-2 sm:px-4 py-6">
       <div className="grid w-full grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         {renderContent()}
       </div>
@@ -183,7 +183,7 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
         </div>
       )}
       {state.error && (
-        <ErrorWarning onRetry={loadContent} errorMessage={state.error} />
+        <ErrorWarning />
       )}
     </div>
   );
