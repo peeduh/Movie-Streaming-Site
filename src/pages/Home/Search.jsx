@@ -1,8 +1,6 @@
 import { useState, forwardRef, useEffect, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { FaSearch } from 'react-icons/fa';
-import { useMovie } from './useMovie'; // Import Movie context
-import { useSeries } from './useSeries'; // Import Series context
 
 const API_KEY = import.meta.env.VITE_TMDB_API;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -99,9 +97,6 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [error, setError] = useState(null);
 
-  const { selectMovie } = useMovie();
-  const { selectSeries } = useSeries();
-
   const debouncedSearch = useCallback(() => {
     let timeoutId;
     return (searchQuery) => {
@@ -143,8 +138,38 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
     }
   };
 
+  // NEW: open VidSrc in a new tab using IMDb ID
+  const handleItemSelection = useCallback(
+    async (item) => {
+      try {
+        const kind = item.media_type === 'tv' ? 'tv' : 'movie';
+        const res = await fetch(
+          `${BASE_URL}/${kind}/${item.id}/external_ids?api_key=${API_KEY}`
+        );
+        const data = await res.json();
+        const imdbId = data?.imdb_id;
+
+        if (!imdbId) {
+          alert('No IMDb ID found for this title.');
+          return;
+        }
+
+        window.open(
+          `https://vidsrc.net/embed/${imdbId}`,
+          '_blank',
+          'noopener,noreferrer'
+        );
+        clearSearch();
+      } catch (e) {
+        console.error(e);
+        alert('Could not open the video. Please try again.');
+      }
+    },
+    []
+  );
+
   const handleKeyNavigation = useCallback(
-    (e) => {
+    async (e) => {
       if (results.length === 0) return;
 
       const keyHandlers = {
@@ -156,13 +181,10 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
           e.preventDefault();
           setSelectedIndex((prev) => Math.max(prev - 1, 0));
         },
-        Enter: () => {
+        Enter: async () => {
           if (selectedIndex >= 0) {
             const selectedItem = results[selectedIndex];
-            const handler =
-              selectedItem.media_type === 'movie' ? selectMovie : selectSeries;
-            handler(selectedItem);
-            clearSearch();
+            await handleItemSelection(selectedItem);
           }
         },
         Escape: () => {
@@ -173,7 +195,7 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
       const handler = keyHandlers[e.key];
       if (handler) handler();
     },
-    [results, selectedIndex, selectMovie, selectSeries]
+    [results, selectedIndex, handleItemSelection]
   );
 
   const clearSearch = () => {
@@ -190,15 +212,6 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
       return cleanup;
     }
   }, [query, debouncedSearch]);
-
-  const handleItemSelection = useCallback(
-    (item) => {
-      const handler = item.media_type === 'movie' ? selectMovie : selectSeries;
-      handler(item);
-      clearSearch();
-    },
-    [selectMovie, selectSeries]
-  );
 
   const searchInputClasses = useMemo(
     () => `
