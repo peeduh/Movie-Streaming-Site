@@ -19,19 +19,19 @@ const ImageWithFallback = ({ src, alt, className }) => {
   };
 
   return (
-    <div className={`relative ${className} bg-gray-900`}>
+    <div className={relative ${className} bg-gray-900}>
       {isLoading && src && (
         <img
-          src={`${BLUR_HASH_URL}${src}`}
+          src={${BLUR_HASH_URL}${src}}
           alt="Loading..."
           className="absolute inset-0 w-full h-full object-cover filter blur-md"
         />
       )}
       {!error && src ? (
         <img
-          src={`${IMAGE_BASE_URL}${src}`}
+          src={${IMAGE_BASE_URL}${src}}
           alt={alt}
-          className={`w-full h-full object-cover ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+          className={w-full h-full object-cover ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300}
           onLoad={handleLoad}
           onError={handleError}
           loading="lazy"
@@ -49,8 +49,8 @@ const SearchResults = ({ results, selectedIndex, onMouseEnter, onClick }) => {
   const renderResultItem = (item, index) => (
     <div
       key={item.id}
-      className={`flex items-center p-2 border-b border-slate-950 cursor-pointer transition-colors duration-200
-        ${selectedIndex === index ? 'bg-gray-700' : 'hover:bg-gray-800'}`}
+      className={flex items-center p-2 border-b border-slate-950 cursor-pointer transition-colors duration-200
+        ${selectedIndex === index ? 'bg-gray-700' : 'hover:bg-gray-800'}}
       onMouseEnter={() => onMouseEnter(index)}
       onClick={() => onClick(item)}
     >
@@ -117,11 +117,11 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(searchQuery)}&language=en-US&page=1&include_adult=false`
+        ${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(searchQuery)}&language=en-US&page=1&include_adult=false
       );
 
       if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(HTTP error! status: ${response.status});
 
       const data = await response.json();
       const filteredResults = data.results
@@ -138,13 +138,13 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
     }
   };
 
-  // Open via your Netlify proxy route
+  // NEW: open VidSrc in a new tab using IMDb ID
   const handleItemSelection = useCallback(
     async (item) => {
       try {
         const kind = item.media_type === 'tv' ? 'tv' : 'movie';
         const res = await fetch(
-          `${BASE_URL}/${kind}/${item.id}/external_ids?api_key=${API_KEY}`
+          ${BASE_URL}/${kind}/${item.id}/external_ids?api_key=${API_KEY}
         );
         const data = await res.json();
         const imdbId = data?.imdb_id;
@@ -154,8 +154,11 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
           return;
         }
 
-        // If your route is /p/:imdb instead, change to `/p/${imdbId}`
-        window.open(`/vidproxy/${imdbId}`, '_blank');
+        window.open(
+          https://vidsrc.net/embed/${imdbId},
+          '_blank',
+          'noopener,noreferrer'
+        );
         clearSearch();
       } catch (e) {
         console.error(e);
@@ -211,11 +214,11 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
   }, [query, debouncedSearch]);
 
   const searchInputClasses = useMemo(
-    () => `
+    () => 
     w-full bg-gray-800 text-white px-6 py-1.5 rounded-full text-sm
     focus:outline-none focus:ring-2 focus:ring-red-600 transition-all duration-200
     ${isActive ? 'ring-2 ring-white' : ''}
-  `,
+  ,
     [isActive]
   );
 
