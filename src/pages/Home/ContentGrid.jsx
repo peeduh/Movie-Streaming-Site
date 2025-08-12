@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import ContentCard from './ContentCard';
 import { fetchContentByGenre } from './Fetcher';
 import { BiWifi } from 'react-icons/bi';
+import SafeVidSrcPlayer from './components/SafeVidSrcPlayer'; // <-- NEW
 
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const MAX_PAGES = 500;
@@ -30,12 +31,12 @@ const ContentGrid = ({ genreId, type }) => {
     uniqueIds: new Set(),
   });
 
+  const [selectedImdbId, setSelectedImdbId] = useState(null); // <-- NEW
   const loadingRef = useRef(false);
   const observerRef = useRef(null);
   const lastElementRef = useRef(null);
 
-  // Fetch and open in new tab
-  const openOnVidSrc = async (item) => {
+  const openEmbedded = async (item) => {
     try {
       const kind = type === 'tv' || item.media_type === 'tv' ? 'tv' : 'movie';
       const res = await fetch(
@@ -47,10 +48,15 @@ const ContentGrid = ({ genreId, type }) => {
         alert('No IMDb ID found for this title.');
         return;
       }
-      window.open(`https://vidsrc.net/embed/${imdbId}`, '_blank', 'noopener,noreferrer');
+      setSelectedImdbId(imdbId);
+      // Scroll player into view on click
+      setTimeout(() => {
+        const el = document.getElementById('embedded-player');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
     } catch (e) {
       console.error(e);
-      alert('Could not open the video. Please try again.');
+      alert('Could not load the player. Please try again.');
     }
   };
 
@@ -107,6 +113,7 @@ const ContentGrid = ({ genreId, type }) => {
       hasMore: true,
       uniqueIds: new Set(),
     });
+    setSelectedImdbId(null);
   }, [genreId, type]);
 
   useEffect(() => {
@@ -167,7 +174,7 @@ const ContentGrid = ({ genreId, type }) => {
             title={item.title || item.name}
             poster={posterPath}
             rating={item.vote_average}
-            onClick={() => openOnVidSrc(item)}
+            onClick={() => openEmbedded(item)}
             releaseDate={item.release_date || item.first_air_date}
             aria-label={`Select ${item.title || item.name}`}
           />
@@ -195,7 +202,15 @@ const ContentGrid = ({ genreId, type }) => {
   };
 
   return (
-    <div className=" px-2 sm:px-4 py-6">
+    <div className="px-2 sm:px-4 py-6">
+      {/* Embedded player anchor */}
+      <div id="embedded-player">
+        <SafeVidSrcPlayer
+          imdbId={selectedImdbId}
+          onClose={() => setSelectedImdbId(null)}
+        />
+      </div>
+
       <div className="grid w-full grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         {renderContent()}
       </div>
@@ -205,7 +220,7 @@ const ContentGrid = ({ genreId, type }) => {
         </div>
       )}
       {state.error && (
-        <ErrorWarning onRetry={loadContent} errorMessage={state.error} />
+        <ErrorWarning />
       )}
     </div>
   );
