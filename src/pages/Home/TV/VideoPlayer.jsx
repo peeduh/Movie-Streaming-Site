@@ -50,7 +50,7 @@ const VideoPlayer = ({ tvId, season = 1, episode = 1 }) => {
     window.removeEventListener('blur', handleWindowBlur);
   }, []);
 
-  const iframeSrc = `https://vidsrc.dev/embed/tv/${tvId}/${season}/${episode}`;
+  const iframeSrc = `https://vidsrc.net/embed/tv/${tvId}/${season}/${episode}`;
 
   return (
     <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
