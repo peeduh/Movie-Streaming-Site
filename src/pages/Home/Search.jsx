@@ -1,7 +1,6 @@
 import { useState, forwardRef, useEffect, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { FaSearch } from 'react-icons/fa';
-import SafeVidSrcPlayer from '../../components/SafeVidSrcPlayer'; // <-- NEW import
 
 const API_KEY = import.meta.env.VITE_TMDB_API;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -97,7 +96,6 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
   const [results, setResults] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [error, setError] = useState(null);
-  const [selectedImdbId, setSelectedImdbId] = useState(null); // <-- NEW
 
   const debouncedSearch = useCallback(() => {
     let timeoutId;
@@ -140,7 +138,7 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
     }
   };
 
-  // Embed: fetch IMDb ID then show SafeVidSrcPlayer
+  // Open VidSrc in a new tab using IMDb ID (kept from your working change)
   const handleItemSelection = useCallback(
     async (item) => {
       try {
@@ -156,12 +154,15 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
           return;
         }
 
-        setSelectedImdbId(imdbId);
-        // keep results open so user can pick another, or clear if you prefer:
-        // clearSearch();
+        window.open(
+          `https://vidsrc.net/embed/${imdbId}`,
+          '_blank',
+          'noopener,noreferrer'
+        );
+        clearSearch();
       } catch (e) {
         console.error(e);
-        alert('Could not load the player. Please try again.');
+        alert('Could not open the video. Please try again.');
       }
     },
     []
@@ -225,12 +226,6 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
   return (
     <div className="relative bg-black/90 w-full px-3 py-3">
       <div className="max-w-5xl mx-auto">
-        {/* Embedded player appears here when a result is selected */}
-        <SafeVidSrcPlayer
-          imdbId={selectedImdbId}
-          onClose={() => setSelectedImdbId(null)}
-        />
-
         <div className="relative">
           <input
             ref={ref}
