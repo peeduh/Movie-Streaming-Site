@@ -9,6 +9,24 @@ const MAX_PAGES = 500;
 const API_KEY = import.meta.env.VITE_TMDB_API;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
+// ---- device helpers ----
+const isMobile = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || navigator.vendor || '';
+  const touch = typeof navigator.maxTouchPoints === 'number' && navigator.maxTouchPoints > 1;
+  return /android|iphone|ipad|ipod|iemobile|blackberry|bb10|mobile|mobi|tablet/i.test(ua) || touch;
+};
+
+const openUrlRespectingDevice = (url) => {
+  if (isMobile()) {
+    // mobile: same tab
+    window.location.assign(url);
+  } else {
+    // desktop: new tab
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+};
+
 const ErrorWarning = () => (
   <div className="flex flex-col items-center justify-center space-y-2 p-4  max-w-xs mx-auto">
     <div className="relative">
@@ -34,7 +52,7 @@ const ContentGrid = ({ genreId, type }) => {
   const observerRef = useRef(null);
   const lastElementRef = useRef(null);
 
-  // Fetch and open in new tab
+  // Fetch and open respecting device
   const openOnVidSrc = async (item) => {
     try {
       const kind = type === 'tv' || item.media_type === 'tv' ? 'tv' : 'movie';
@@ -47,7 +65,8 @@ const ContentGrid = ({ genreId, type }) => {
         alert('No IMDb ID found for this title.');
         return;
       }
-      window.open(`https://vidsrc.net/embed/${imdbId}`, '_blank', 'noopener,noreferrer');
+      const url = `https://vidsrc.net/embed/${imdbId}`;
+      openUrlRespectingDevice(url);
     } catch (e) {
       console.error(e);
       alert('Could not open the video. Please try again.');

@@ -8,6 +8,24 @@ const DEBOUNCE_DELAY = 350;
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const BLUR_HASH_URL = 'https://image.tmdb.org/t/p/w100';
 
+// ---- device helpers ----
+const isMobile = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || navigator.vendor || '';
+  const touch = typeof navigator.maxTouchPoints === 'number' && navigator.maxTouchPoints > 1;
+  return /android|iphone|ipad|ipod|iemobile|blackberry|bb10|mobile|mobi|tablet/i.test(ua) || touch;
+};
+
+const openUrlRespectingDevice = (url) => {
+  if (isMobile()) {
+    // mobile: same tab
+    window.location.assign(url);
+  } else {
+    // desktop: new tab
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+};
+
 const ImageWithFallback = ({ src, alt, className }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -138,7 +156,7 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
     }
   };
 
-  // Open VidSrc in a new tab using IMDb ID (kept from your working change)
+  // Open VidSrc (mobile: same tab, desktop: new tab)
   const handleItemSelection = useCallback(
     async (item) => {
       try {
@@ -154,11 +172,8 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
           return;
         }
 
-        window.open(
-          `https://vidsrc.net/embed/${imdbId}`,
-          '_blank',
-          'noopener,noreferrer'
-        );
+        const url = `https://vidsrc.net/embed/${imdbId}`;
+        openUrlRespectingDevice(url);
         clearSearch();
       } catch (e) {
         console.error(e);
